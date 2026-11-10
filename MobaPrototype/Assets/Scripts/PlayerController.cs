@@ -4,6 +4,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Движение")]
     public float speed = 5f;
+    public float rotationSpeed = 10f; // Скорость поворота персонажа
     private CharacterController controller;
 
     [Header("Атака")]
@@ -14,7 +15,6 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        // Получаем компонент CharacterController при старте
         controller = GetComponent<CharacterController>();
     }
 
@@ -26,27 +26,34 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        // Получение ввода с клавиатуры (WASD или стрелки)
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        // Направление движения
-        Vector3 move = new Vector3(h, 0, v);
-        move = Vector3.ClampMagnitude(move, 1f); // Ограничение диагональной скорости
+        Vector3 camForward = Camera.main.transform.forward;
+        Vector3 camRight = Camera.main.transform.right;
 
-        // Применение движения
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
+
+        Vector3 move = (camForward * v + camRight * h).normalized;
+
         controller.Move(move * speed * Time.deltaTime);
 
-        // Поворот персонажа в сторону движения
+        // ПЛАВНЫЙ ПОВОРОТ (вместо мгновенного transform.forward = move)
         if (move != Vector3.zero)
         {
-            transform.forward = move;
+            // Вычисляем нужный угол поворота
+            Quaternion targetRotation = Quaternion.LookRotation(move);
+
+            // Плавно поворачиваем от текущего положения к нужному
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
     }
 
     void HandleAttack()
     {
-        // Проверка нажатия ЛКМ и кулдауна
         if (Input.GetMouseButtonDown(0) && Time.time - lastAttackTime > attackCooldown)
         {
             lastAttackTime = Time.time;
@@ -56,14 +63,10 @@ public class PlayerController : MonoBehaviour
 
     void Attack()
     {
-        // Создаем невидимую сферу вокруг игрока и проверяем, что в нее попало
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
-
         foreach (var hit in hitColliders)
         {
             Health health = hit.GetComponent<Health>();
-
-            // Если у объекта есть скрипт Health и это не сам игрок — наносим урон
             if (health != null && hit.gameObject != gameObject)
             {
                 health.TakeDamage(attackDamage);
@@ -71,7 +74,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Опционально: чтобы видеть радиус атаки в редакторе Unity (в окне Scene)
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
