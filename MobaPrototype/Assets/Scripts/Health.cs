@@ -29,6 +29,9 @@ public class Health : MonoBehaviour
 
     void Die()
     {
+        // Если это база, сообщаем GameManager
+        if (CompareTag("BlueBase")) GameManager.Instance.OnBaseDestroyed(true);
+        if (CompareTag("RedBase")) GameManager.Instance.OnBaseDestroyed(false);
         onDeath.Invoke();
         // Временно: просто отключаем объект (для игрока позже заменим на респавн)
         gameObject.SetActive(false);
