@@ -64,12 +64,18 @@ public class PlayerController : MonoBehaviour
     void Attack()
     {
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
-        Debug.Log("Атака! Найдено объектов в радиусе: " + hitColliders.Length);
 
         foreach (var hit in hitColliders)
         {
+            // 1. Пропускаем самого игрока
+            if (hit.gameObject == gameObject) continue;
+
+            // 2. Пропускаем нашу (синюю) базу
+            if (hit.CompareTag("BlueBase")) continue;
+
+            // 3. Если у объекта есть скрипт Health — наносим урон
             Health health = hit.GetComponent<Health>();
-            if (health != null && hit.gameObject != gameObject)
+            if (health != null)
             {
                 health.TakeDamage(attackDamage);
             }

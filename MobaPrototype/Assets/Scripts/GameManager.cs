@@ -32,10 +32,13 @@ public class GameManager : MonoBehaviour
         if (endPanel != null) endPanel.SetActive(true);
         if (resultText != null) resultText.text = playerWon ? "ПОБЕДА " : "ПОРАЖЕНИЕ";
         if (statsText != null) statsText.text = $"Убийств: {playerKills}\nСмертей: {playerDeaths}\nУбито миньонов: {minionsKilled}";
-        
-        // --- ОСТАНАВЛИВАЕМ ИГРУ ---
-        // Время в игре замирает. Крипы и базы перестают стрелять и двигаться.
-        Time.timeScale = 0f; 
+
+        //Останавливаем таймер
+        GameTimer timer = FindAnyObjectByType<GameTimer>();
+        if (timer != null) timer.StopTimer();
+
+        //ОСТАНАВЛИВАЕМ ИГРУ
+        Time.timeScale = 0f;
     }
 
     public void OnBaseDestroyed(bool isPlayerBase)
