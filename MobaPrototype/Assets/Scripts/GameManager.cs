@@ -1,5 +1,6 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.SceneManagement; 
+using TMPro; 
 
 public class GameManager : MonoBehaviour
 {
@@ -17,25 +18,35 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         if (endPanel != null) endPanel.SetActive(false);
+        
+        // На всякий случай возвращаем нормальное время при старте сцены
+        Time.timeScale = 1f; 
     }
 
-    // Методы для добавления статистики
     public void AddKill() { playerKills++; }
     public void AddDeath() { playerDeaths++; }
     public void AddMinionKill() { minionsKilled++; }
 
     public void EndGame(bool playerWon)
     {
-        endPanel.SetActive(true);
-        resultText.text = playerWon ? "ПОБЕДА " : "ПОРАЖЕНИЕ";
-        statsText.text = $"Убийств: {playerKills}\nСмертей: {playerDeaths}\nУбито миньонов: {minionsKilled}";
-
-        // Останавливаем время в игре (опционально)
-        // Time.timeScale = 0f; 
+        if (endPanel != null) endPanel.SetActive(true);
+        if (resultText != null) resultText.text = playerWon ? "ПОБЕДА " : "ПОРАЖЕНИЕ";
+        if (statsText != null) statsText.text = $"Убийств: {playerKills}\nСмертей: {playerDeaths}\nУбито миньонов: {minionsKilled}";
+        
+        // --- ОСТАНАВЛИВАЕМ ИГРУ ---
+        // Время в игре замирает. Крипы и базы перестают стрелять и двигаться.
+        Time.timeScale = 0f; 
     }
 
     public void OnBaseDestroyed(bool isPlayerBase)
     {
-        EndGame(!isPlayerBase);
+        EndGame(!isPlayerBase); 
+    }
+
+    public void RestartGame()
+    {
+        // Возвращаем время в норму перед перезагрузкой сцены, иначе игра запустится "замороженной"
+        Time.timeScale = 1f; 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
