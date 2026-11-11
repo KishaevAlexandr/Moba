@@ -1,6 +1,5 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using TMPro; // Если используете TextMeshPro
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,19 +16,26 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        endPanel.SetActive(false);
+        if (endPanel != null) endPanel.SetActive(false);
     }
+
+    // Методы для добавления статистики
+    public void AddKill() { playerKills++; }
+    public void AddDeath() { playerDeaths++; }
+    public void AddMinionKill() { minionsKilled++; }
 
     public void EndGame(bool playerWon)
     {
         endPanel.SetActive(true);
         resultText.text = playerWon ? "ПОБЕДА " : "ПОРАЖЕНИЕ";
         statsText.text = $"Убийств: {playerKills}\nСмертей: {playerDeaths}\nУбито миньонов: {minionsKilled}";
+
+        // Останавливаем время в игре (опционально)
+        // Time.timeScale = 0f; 
     }
 
-    // Вызывается при смерти базы
     public void OnBaseDestroyed(bool isPlayerBase)
     {
-        EndGame(!isPlayerBase); // Если разрушена база игрока, игрок проиграл
+        EndGame(!isPlayerBase);
     }
 }
