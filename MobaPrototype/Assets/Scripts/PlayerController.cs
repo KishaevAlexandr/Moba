@@ -64,6 +64,8 @@ public class PlayerController : MonoBehaviour
     void Attack()
     {
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
+        Debug.Log("Атака! Найдено объектов в радиусе: " + hitColliders.Length);
+
         foreach (var hit in hitColliders)
         {
             Health health = hit.GetComponent<Health>();

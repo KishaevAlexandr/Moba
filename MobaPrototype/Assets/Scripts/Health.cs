@@ -4,8 +4,9 @@ using UnityEngine.Events;
 public class Health : MonoBehaviour
 {
     public float maxHealth = 100f;
-    private float currentHealth;
-    public UnityEvent onDeath; // Событие смерти, для последующей статистики
+    public float currentHealth; // Сделали public, чтобы видеть в инспекторе, как падает здоровье
+
+    public UnityEvent onDeath;
 
     void Start()
     {
@@ -15,6 +16,8 @@ public class Health : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
+        Debug.Log(gameObject.name + " получил урон: " + amount + ". Осталось здоровья: " + currentHealth);
+
         if (currentHealth <= 0)
         {
             currentHealth = 0;
@@ -29,13 +32,24 @@ public class Health : MonoBehaviour
 
     void Die()
     {
-        // Если это база, сообщаем GameManager
-        if (CompareTag("BlueBase")) GameManager.Instance.OnBaseDestroyed(true);
-        if (CompareTag("RedBase")) GameManager.Instance.OnBaseDestroyed(false);
+        Debug.Log(gameObject.name + " УНИЧТОЖЕН!");
         onDeath.Invoke();
-        // Временно: просто отключаем объект (для игрока позже заменим на респавн)
-        gameObject.SetActive(false);
+
+        // Проверка на победу/поражение
+        if (CompareTag("BlueBase"))
+        {
+            if (GameManager.Instance != null) GameManager.Instance.OnBaseDestroyed(true);
+        }
+        if (CompareTag("RedBase"))
+        {
+            if (GameManager.Instance != null) GameManager.Instance.OnBaseDestroyed(false);
+        }
+
+        gameObject.SetActive(false); // Скрываем объект
     }
 
-    public float GetCurrentHealth() => currentHealth;
+    public float GetCurrentHealth()
+    {
+        return currentHealth;
+    }
 }
